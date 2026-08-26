@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  content: MyText
+  energy_level: MyString
+  mood: MyString
+  date: 2026-08-25
+
+two:
+  user: two
+  content: MyText
+  energy_level: MyString
+  mood: MyString
+  date: 2026-08-25

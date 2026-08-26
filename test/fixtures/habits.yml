@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  water_completed: false
+  steps_completed: false
+  date: 2026-08-25
+
+two:
+  user: two
+  water_completed: false
+  steps_completed: false
+  date: 2026-08-25

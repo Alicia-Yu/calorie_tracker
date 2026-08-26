@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="csrf-token" content="<%= form_authenticity_token %>">
+  <title>Calorie & Habit Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --card-bg: #ffffff;
+      --border-color: #ddd;
+      --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body.dark-mode {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --card-bg: #2d2d2d;
+      --border-color: #444;
+      --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body { 
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(ellipse 800px 600px at 20% 30%, rgba(255, 105, 180, 0.85), transparent 70%),
+        radial-gradient(ellipse 700px 500px at 80% 20%, rgba(186, 85, 211, 0.8), transparent 70%),
+        radial-gradient(ellipse 600px 700px at 10% 70%, rgba(100, 200, 255, 0.8), transparent 70%),
+        radial-gradient(ellipse 750px 550px at 70% 60%, rgba(255, 150, 200, 0.75), transparent 70%),
+        radial-gradient(ellipse 650px 600px at 45% 80%, rgba(200, 100, 255, 0.8), transparent 70%),
+        radial-gradient(ellipse 700px 450px at 90% 70%, rgba(255, 182, 193, 0.75), transparent 70%),
+        radial-gradient(ellipse 550px 650px at 35% 40%, rgba(135, 206, 250, 0.7), transparent 70%);
+      color: var(--text-primary);
+      min-height: 100vh; 
+      padding: 40px 0; 
+      font-family: 'Segoe UI';
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background-image: 
+        radial-gradient(ellipse 800px 600px at 20% 30%, rgba(139, 0, 0, 0.6), transparent 70%),
+        radial-gradient(ellipse 700px 500px at 80% 20%, rgba(75, 0, 130, 0.6), transparent 70%),
+        radial-gradient(ellipse 600px 700px at 10% 70%, rgba(25, 25, 112, 0.6), transparent 70%),
+        radial-gradient(ellipse 750px 550px at 70% 60%, rgba(128, 0, 128, 0.5), transparent 70%),
+        radial-gradient(ellipse 650px 600px at 45% 80%, rgba(72, 61, 139, 0.6), transparent 70%),
+        radial-gradient(ellipse 700px 450px at 90% 70%, rgba(153, 50, 204, 0.5), transparent 70%),
+        radial-gradient(ellipse 550px 650px at 35% 40%, rgba(30, 30, 100, 0.6), transparent 70%);
+    }
+
+    .container { max-width: 1200px; }
+    
+    .header { 
+      text-align: center; 
+      margin-bottom: 30px; 
+      position: relative;
+      padding-top: 20px;
+    }
+    
+    .header h1 { 
+      font-size: 2.5em; 
+      font-weight: bold;
+      color: #000000;
+      text-shadow: 2px 2px 4px rgba(200, 200, 200, 0.8);
+    }
+
+    .header p {
+      color: #000000;
+      text-shadow: 1px 1px 3px rgba(200, 200, 200, 0.8);
+      font-size: 1.1em;
+    }
+
+    body.dark-mode .header h1 {
+      color: #ffffff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    body.dark-mode .header p {
+      color: #ffffff;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    
+    .dark-mode-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid white;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1.5em;
+      transition: background 0.3s;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dark-mode-toggle:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .card-custom { 
+      background: var(--card-bg); 
+      color: var(--text-primary);
+      border-radius: 15px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .progress-section { padding: 25px; }
+    .progress-item { margin-bottom: 20px; }
+    .progress-label { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+    .progress-bar-custom { height: 25px; border-radius: 10px; background: var(--bg-secondary); }
+    
+    .meal-section { padding: 20px; }
+    .meal-type-title { font-size: 1.2em; font-weight: bold; color: #667eea; margin: 20px 0 15px 0; }
+    .meal-item { background: var(--bg-secondary); color: var(--text-primary); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .meal-info { flex: 1; }
+    .meal-calories { color: #667eea; font-weight: bold; }
+    .meal-protein { color: #28a745; font-weight: bold; }
+    .btn-delete { background: #dc3545; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    .btn-delete:hover { background: #c82333; }
+    
+    .add-meal-form { background: var(--bg-secondary); color: var(--text-primary); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    
+    .habit-section { padding: 20px; }
+    .habit-item { display: flex; align-items: center; margin-bottom: 15px; padding: 15px; background: var(--bg-secondary); color: var(--text-primary); border-radius: 10px; }
+    .habit-checkbox { width: 40px; height: 40px; margin-right: 15px; cursor: pointer; }
+    .habit-text { font-size: 1.1em; color: var(--text-primary); flex: 1; }
+    .habit-completed { background: #d4edda; }
+    
+    .calendar-section { padding: 20px; }
+    .calendar-table { width: 100%; border-collapse: collapse; }
+    .calendar-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: center; font-weight: bold; }
+    .calendar-day-cell { border: 1px solid var(--border-color); padding: 15px; text-align: center; height: 100px; vertical-align: top; background: var(--bg-secondary); color: var(--text-primary); }
+    .calendar-day-cell.today { background: #e3f2fd; border: 2px solid #667eea; }
+    .day-date { font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px; }
+    .workout-icon { font-size: 2em; }
+    
+    .notes-section { padding: 20px; }
+    .note-item { background: var(--bg-secondary); color: var(--text-primary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #667eea; }
+    .note-content { margin: 8px 0; }
+    .note-meta { font-size: 0.85em; color: var(--text-secondary); }
+    .mood-energy { font-size: 1.1em; margin: 8px 0; }
+    .btn-note-delete { background: #dc3545; border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    
+    .stats-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+    .stat-box { color: white; padding: 20px; border-radius: 10px; text-align: center; }
+    .stat-box-pink { background: linear-gradient(135deg, #ff6b9d 0%, #ff4757 100%); }
+    .stat-box-blue { background: linear-gradient(135deg, #4169e1 0%, #0066ff 100%); }
+    .stat-number { font-size: 2em; font-weight: bold; }
+    .stat-label { font-size: 0.9em; opacity: 0.9; }
+
+    .form-control, .form-select {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-color: #667eea;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+
+    .btn-success {
+      background: #28a745;
+      border: none;
+    }
+
+    label {
+      color: var(--text-primary);
+    }
+
+    h4 {
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header with Dark Mode Toggle -->
+  <div class="header">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+    <h1>💪 Calorie & Habit Tracker</h1>
+    <p>Track your nutrition and build healthy habits</p>
+  </div>
+
+  <!-- Daily Goals Settings -->
+  <div class="card-custom">
+    <div class="progress-section">
+      <h4>⚙️ Daily Goals</h4>
+      <form method="post" action="/users/<%= @user.id %>" style="margin-top: 15px;">
+        <%= hidden_field_tag :_method, :patch %>
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Daily Calorie Goal</label>
+            <input type="number" name="user[daily_calorie_goal]" value="<%= @user.daily_calorie_goal %>" class="form-control" placeholder="2000">
+          </div>
+          <div class="col-md-4">
+            <label>Daily Protein Goal (g)</label>
+            <input type="number" name="user[daily_protein_goal]" value="<%= @user.daily_protein_goal %>" class="form-control" placeholder="150">
+          </div>
+          <div class="col-md-4">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary w-100">Update Goals</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Progress Overview -->
+  <div class="card-custom">
+    <div class="progress-section">
+      <h4>📊 Today's Progress</h4>
+      
+      <div class="stats-container">
+        <div class="stat-box stat-box-pink">
+          <div class="stat-number"><%= @total_calories %></div>
+          <div class="stat-label">Calories Consumed</div>
+        </div>
+        <div class="stat-box stat-box-blue">
+          <div class="stat-number"><%= @remaining_calories %></div>
+          <div class="stat-label">Calories Remaining</div>
+        </div>
+        <div class="stat-box stat-box-pink">
+          <div class="stat-number"><%= @total_protein %>g</div>
+          <div class="stat-label">Protein Consumed</div>
+        </div>
+        <div class="stat-box stat-box-blue">
+          <div class="stat-number"><%= @remaining_protein %>g</div>
+          <div class="stat-label">Protein Remaining</div>
+        </div>
+      </div>
+
+      <!-- Calorie Progress Bar -->
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>Calories</span>
+          <span><%= @total_calories %> / <%= @user.daily_calorie_goal %></span>
+        </div>
+        <div class="progress-bar-custom">
+          <div style="height: 100%; background: linear-gradient(90deg, #4169e1, #9b59b6); border-radius: 10px; width: <%= [@total_calories.to_f / @user.daily_calorie_goal * 100, 100].min %>%;"></div>
+        </div>
+      </div>
+
+      <!-- Protein Progress Bar -->
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>Protein</span>
+          <span><%= @total_protein %>g / <%= @user.daily_protein_goal %>g</span>
+        </div>
+        <div class="progress-bar-custom">
+          <div style="height: 100%; background: linear-gradient(90deg, #4169e1, #9b59b6); border-radius: 10px; width: <%= [@total_protein.to_f / @user.daily_protein_goal * 100, 100].min %>%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Meal Form -->
+  <div class="card-custom">
+    <div class="meal-section">
+      <h4>➕ Add Meal</h4>
+      <form method="post" action="/meals" class="add-meal-form">
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="form-label">Meal Type</label>
+            <select name="meal[meal_type]" class="form-select" required>
+              <option value="">Select meal</option>
+              <option value="Breakfast">🍳 Breakfast</option>
+              <option value="Lunch">🥗 Lunch</option>
+              <option value="Dinner">🍽️ Dinner</option>
+              <option value="Snacks">🍎 Snacks</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Calories</label>
+            <input type="number" name="meal[calories]" class="form-control" placeholder="500" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Protein (g)</label>
+            <input type="number" name="meal[protein]" class="form-control" placeholder="25" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-success w-100">Add Meal</button>
+          </div>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-md-12">
+            <label class="form-label">Food Description</label>
+            <input type="text" name="meal[description]" class="form-control" placeholder="e.g., Chicken breast with rice">
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Meals by Type -->
+  <div class="card-custom">
+    <div class="meal-section">
+      <h4>🍴 Today's Meals</h4>
+      
+      <% ["Breakfast", "Lunch", "Dinner", "Snacks"].each do |meal_type| %>
+        <div class="meal-type-title"><%= meal_type %></div>
+        <% @today_meals.where(meal_type: meal_type).each do |meal| %>
+          <div class="meal-item">
+            <div class="meal-info">
+              <div><strong><%= meal.description %></strong></div>
+              <div style="font-size: 0.9em;">
+                <span class="meal-calories">🔥 <%= meal.calories %> cal</span> | 
+                <span class="meal-protein">💪 <%= meal.protein %>g protein</span>
+              </div>
+            </div>
+            <form method="post" action="/meals/<%= meal.id %>" style="display: inline;">
+              <%= hidden_field_tag :_method, :delete %>
+              <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+              <button type="submit" class="btn-delete">🗑️ Delete</button>
+            </form>
+          </div>
+        <% end %>
+        <% if @today_meals.where(meal_type: meal_type).empty? %>
+          <p style="color: var(--text-secondary); font-size: 0.9em;">No meals added yet</p>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Habits Tracker -->
+  <div class="card-custom">
+    <div class="habit-section">
+      <h4>✅ Daily Habits</h4>
+      
+      <form method="post" action="/habits/<%= @today_habit.id %>" id="habits_form">
+        <%= hidden_field_tag :_method, :patch %>
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        
+        <!-- Water Habit -->
+        <div class="habit-item <%= @today_habit.water_completed ? 'habit-completed' : '' %>">
+          <input type="checkbox" name="habit[water_completed]" value="1" class="habit-checkbox" 
+            <%= @today_habit.water_completed ? 'checked' : '' %> 
+            onchange="document.getElementById('habits_form').submit()">
+          <div class="habit-text">💧 Drank 3L of Water Today</div>
+          <span style="font-size: 1.5em;"><%= @today_habit.water_completed ? '✓' : '' %></span>
+        </div>
+
+        <!-- Steps Habit -->
+        <div class="habit-item <%= @today_habit.steps_completed ? 'habit-completed' : '' %>">
+          <input type="checkbox" name="habit[steps_completed]" value="1" class="habit-checkbox" 
+            <%= @today_habit.steps_completed ? 'checked' : '' %>
+            onchange="document.getElementById('habits_form').submit()">
+          <div class="habit-text">👟 Walked 10,000 Steps Today</div>
+          <span style="font-size: 1.5em;"><%= @today_habit.steps_completed ? '✓' : '' %></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notes & Mood/Energy -->
+  <div class="card-custom">
+    <div class="notes-section">
+      <h4>📝 Daily Notes & Mood</h4>
+      
+      <form method="post" action="/notes" style="margin-bottom: 20px;">
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label">Energy Level</label>
+            <select name="note[energy_level]" class="form-select">
+              <option value="">Select energy</option>
+              <option value="⚡ High">⚡ High</option>
+              <option value="😊 Good">😊 Good</option>
+              <option value="😐 Okay">😐 Okay</option>
+              <option value="😴 Low">😴 Low</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Mood</label>
+            <select name="note[mood]" class="form-select">
+              <option value="">Select mood</option>
+              <option value="😄 Great">😄 Great</option>
+              <option value="😊 Happy">😊 Happy</option>
+              <option value="😐 Neutral">😐 Neutral</option>
+              <option value="😔 Sad">😔 Sad</option>
+              <option value="😠 Angry">😠 Angry</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary w-100">Save Note</button>
+          </div>
+        </div>
+        <div class="row g-2 mt-2">
+          <div class="col-md-12">
+            <label class="form-label">Notes</label>
+            <textarea name="note[content]" class="form-control" placeholder="Write your thoughts, to-do items, or anything on your mind..." rows="4"></textarea>
+          </div>
+        </div>
+      </form>
+
+      <div style="max-height: 400px; overflow-y: auto;">
+        <% @today_notes.order(created_at: :desc).each do |note| %>
+          <div class="note-item">
+            <div class="mood-energy">
+              <% if note.energy_level.present? %>
+                <span><%= note.energy_level %></span>
+              <% end %>
+              <% if note.mood.present? %>
+                <span style="margin-left: 10px;"><%= note.mood %></span>
+              <% end %>
+            </div>
+            <div class="note-content"><%= note.content %></div>
+            <div class="note-meta">
+              <%= note.created_at.strftime("%I:%M %p") %>
+              <form method="post" action="/notes/<%= note.id %>" style="display: inline; margin-left: 10px;">
+                <%= hidden_field_tag :_method, :delete %>
+                <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+                <button type="submit" class="btn-note-delete">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% end %>
+        <% if @today_notes.empty? %>
+          <p style="color: var(--text-secondary); font-size: 0.9em;">No notes yet</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Workout Calendar -->
+  <div class="card-custom">
+    <div class="calendar-section">
+      <h4>💪 This Week's Workouts</h4>
+      
+      <table class="calendar-table">
+        <tr>
+          <% ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].each_with_index do |day, index| %>
+            <td class="calendar-header"><%= day %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <% @week_dates.each do |date| %>
+            <td class="calendar-day-cell <%= date == Date.today ? 'today' : '' %>">
+              <div class="day-date"><%= date.strftime("%m/%d") %></div>
+              <div class="workout-icon">
+                <% if [1, 3, 5].include?(date.wday) %>
+                  💪
+                <% elsif [2, 4, 0].include?(date.wday) %>
+                  🏃
+                <% else %>
+                  ☀️
+                <% end %>
+              </div>
+              <div style="font-size: 0.8em; color: var(--text-secondary); margin-top: 5px;">
+                <% if [1, 3, 5].include?(date.wday) %>
+                  Strength
+                <% elsif [2, 4, 0].include?(date.wday) %>
+                  Cardio
+                <% else %>
+                  Rest
+                <% end %>
+              </div>
+            </td>
+          <% end %>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    updateToggleButton();
+  }
+
+  function updateToggleButton() {
+    const toggle = document.querySelector('.dark-mode-toggle');
+    if (document.body.classList.contains('dark-mode')) {
+      toggle.textContent = '☀️';
+    } else {
+      toggle.textContent = '🌙';
+    }
+  }
+
+  // Load dark mode preference on page load
+  window.addEventListener('DOMContentLoaded', function() {
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    }
+    updateToggleButton();
+  });
+</script>
+</body>
+</html>
